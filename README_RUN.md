@@ -28,17 +28,40 @@ results/                검사 결과 (summary.txt + 영상별 폴더)
 
 ## 1. 설치
 
-요구 사항: Linux, NVIDIA GPU 1장(VRAM 24GB 이상 권장, LLM이 약 15GB 사용), conda, CPU 멀티코어(모션 DB 탐색용)
+요구 사항: Linux, NVIDIA GPU 1장(VRAM 24GB 이상 권장, LLM이 약 15GB 사용), conda, wget, unzip, CPU 멀티코어(모션 DB 탐색용)
+
+GitHub에서 받은 저장소에는 가중치가 없습니다. 아래 두 단계를 거칩니다.
+
+**1) SMPL 모델 넣기 (직접, 1개 파일)**: 라이선스상 재배포가 안 되어 자동으로 받지 않습니다.
+중립(neutral) 모델은 SMPLify 배포본에 들어 있습니다. [smplify.is.tue.mpg.de](https://smplify.is.tue.mpg.de)에 가입하고 SMPLify 코드(zip)를 받으면
+`smplify_public/code/models/basicModel_neutral_lbs_10_207_0_v1.0.0.pkl`이 있습니다. 이 파일을 이름 그대로 아래 위치에 둡니다.
+(SMPL 사이트의 v1.0.0 Python 배포본에는 남/녀 모델만 있고 중립 모델이 없습니다.)
+
+```
+third_party/HybrIK/model_files/
+├─ basicModel_neutral_lbs_10_207_0_v1.0.0.pkl   <- 직접 넣는 파일
+├─ J_regressor_h36m.npy                          (저장소에 포함)
+└─ h36m_mean_beta.npy                            (저장소에 포함)
+```
+
+SMPL-X는 필요 없습니다.
+
+**2) 환경 + 가중치**
 
 ```bash
 cd copyright_detection
-./setup.sh            # conda 환경 'copyright' 생성 + 설치 확인
-# 가중치가 빠진 상태로 받았다면: ./setup.sh --download
+./setup.sh --download              # conda 환경 'copyright' 생성 + 가중치 다운로드(약 16GB) + 설치 점검
+./setup.sh --download --no_llm     # 설명용 LLM(약 15GB)을 빼고 받기 (설명은 규칙 기반 문장)
+./setup.sh --env 이름 --download   # 환경 이름을 바꿀 때. run.sh 가 같은 환경을 쓰도록 .conda_env 에 기록됨
 ```
 
-- `environment.yml`: 사람이 읽기 쉬운 정리본
-- `environment.lock.yml`: 개발 환경을 그대로 export한 버전 고정본 (설치 문제가 생길 때 사용)
-- 설치 확인만 다시 하려면: `conda run -n copyright python integrated/check_setup.py`
+- 마지막에 `모든 항목 정상`이 나오면 설치가 끝난 것입니다. `MISSING`이 남으면 표시된 안내대로 해결합니다.
+- 중간에 실패하면 원인을 해결하고 **같은 명령으로 다시 실행**합니다. 이미 받은 파일은 건너뜁니다. 전체 기록은 `setup.log`에 남습니다.
+- HybrIK 체크포인트는 Google Drive에서 받으므로 일일 한도에 걸릴 수 있습니다. 이때는 실패 메시지에 나오는 링크에서 브라우저로 받아 `third_party/HybrIK/pretrained_models/hybrik_hrnet.pth`로 저장합니다.
+- 설치 점검만 다시 하려면 `conda run -n copyright python integrated/check_setup.py`를 실행합니다.
+- `environment.yml`은 사람이 읽기 쉬운 정리본, `environment.lock.yml`은 개발 환경을 그대로 export한 버전 고정본입니다(설치 문제가 생길 때 사용).
+
+`./run.sh`는 시작할 때 필요한 파일을 먼저 확인합니다. 빠진 파일이 있으면 몇 분씩 돌다 '판정 불가'를 내지 않고, 바로 멈추고 무엇이 없는지 알려 줍니다.
 
 ## 2. 실행
 
@@ -50,7 +73,7 @@ cd copyright_detection
 ./run.sh --reuse                            # 이미 돌린 영상: config.yaml 의 판정 기준만 바꿨을 때 판정·설명만 다시 계산
 ```
 
-Python에서 직접 실행하려면 `conda activate copyright` 후 `python integrated/run_detection.py [--video ...] [옵션]` (옵션 동일).
+Python에서 직접 실행하려면 `conda activate copyright`(설치 때 지정한 환경) 후 `python integrated/run_detection.py [--video ...] [옵션]` (옵션 동일).
 
 결과는 `results/`에 저장됩니다.
 
@@ -172,7 +195,7 @@ DB를 늘리면 다른 사람·다른 동작 간 점수 분포가 바뀌므로 �
 | 구성요소 | 위치 | 라이선스 |
 |---|---|---|
 | HybrIK 코드 | `third_party/HybrIK` (commit `HybrIK_COMMIT.txt`) | MIT |
-| SMPL / SMPL-X 모델 파일 | `third_party/HybrIK/model_files` | **MPI 비상업 연구용** (상업 이용 시 별도 라이선스) |
+| SMPL 모델 파일 (SMPL-X는 미사용) | `third_party/HybrIK/model_files` | **MPI 비상업 연구용** (상업 이용 시 별도 라이선스) |
 | HybrIK 체크포인트 | `third_party/HybrIK/pretrained_models` | HybrIK 배포본 (SMPL 조건 따름) |
 | YOLO11 (ultralytics) | `weights/yolo` | **AGPL-3.0** (상업 비공개 이용 시 Enterprise 라이선스) |
 | InsightFace buffalo_l | `weights/insightface` | 코드 MIT, **모델 가중치는 비상업 연구용** |
@@ -195,6 +218,6 @@ copyright_detection/
 ├─ face_infringement/     얼굴 모듈 코드 (face_identity.py 신규, face_geometry.py 기존)
 ├─ avatar_infringement/   아바타 모듈 코드
 ├─ audio_infringement/    오디오 모듈 코드
-├─ third_party/HybrIK/    HybrIK 코드·SMPL·체크포인트
+├─ third_party/HybrIK/    HybrIK 코드 (SMPL·체크포인트는 설치 때 추가)
 └─ weights/               yolo / insightface / torch / llm
 ```

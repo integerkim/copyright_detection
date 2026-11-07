@@ -17,6 +17,7 @@ import glob
 import json
 import os
 import shutil
+import re
 import subprocess
 import sys
 import traceback
@@ -80,6 +81,13 @@ def sync_motion_db(cfg, gpu=0, log=None):
     return cache
 
 
+def _root_error(log_path):
+    """로그에서 가장 먼저 나온 예외 줄 (subprocess 를 거치면 마지막 줄은 CalledProcessError 라 원인이 안 보임)"""
+    lines = [l.strip() for l in open(log_path, errors="replace")]
+    errs = [l for l in lines if re.match(r"^[\w.]*(Error|Exception)\b.*:", l) and "CalledProcessError" not in l]
+    return (errs[0] if errs else (lines[-1] if lines else ""))[:300]
+
+
 def run_motion(video, out_dir, cfg, gpu=0):
     rd = os.path.join(out_dir, "motion")
     os.makedirs(rd, exist_ok=True)
@@ -95,8 +103,8 @@ def run_motion(video, out_dir, cfg, gpu=0):
                               stdout=log, stderr=subprocess.STDOUT)
     js = os.path.join(rd, "result.json")
     if proc.returncode != 0 or not os.path.exists(js):
-        tail = open(os.path.join(rd, "run.log")).read()[-600:]
-        note = "영상에서 사람을 찾지 못함" if "No person" in tail else f"motion 실행 실패: {tail.strip().splitlines()[-1] if tail.strip() else ''}"
+        note = "영상에서 사람을 찾지 못함" if "No person" in open(os.path.join(rd, "run.log")).read()[-2000:] \
+            else f"motion 실행 실패: {_root_error(os.path.join(rd, 'run.log'))} (motion/run.log 참고)"
         return _empty("motion", note, rd)
     return motion_from_json(rd)
 

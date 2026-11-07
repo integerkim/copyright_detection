@@ -8,6 +8,9 @@ third_party/HybrIK/model_files/smplx_kid_template.npy
 # dlib 랜드마크 (비상업, 기존 face_geometry.py 전용)
 face_infringement/shape_predictor_68_face_landmarks.dat
 # 실행하면 생기는 것
+.conda_env
+setup.log
+*.part
 results/
 cache/
 __pycache__/

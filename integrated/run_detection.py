@@ -20,6 +20,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import yaml  # noqa: E402
 
+import assets as AS  # noqa: E402
 import explain as X  # noqa: E402
 import fusion as FU  # noqa: E402
 import modalities as MO  # noqa: E402
@@ -169,6 +170,14 @@ def main():
         videos += MO._files(os.path.abspath(v), MO.VIDEO_EXT, recursive=False) if os.path.isdir(v) else [os.path.abspath(v)]
     if not videos:
         sys.exit(f"검사할 영상이 없습니다: {a.video or cfg.get('suspect_dir')}")
+    # 사전 점검: 가중치가 빠진 채 몇 분씩 돌다 '판정 불가'가 나오지 않도록 시작 전에 멈춘다
+    miss = AS.missing([m for m in ORDER if m not in a.skip])
+    if miss:
+        print("필요한 파일이 없어 실행하지 않습니다 (전체 점검: python integrated/check_setup.py)")
+        for m, n, p, h in miss:
+            print(f"  [{m}] {n}: {p}\n      -> {h}")
+        mods = " ".join(sorted({m for m, *_ in miss}, key=ORDER.index))
+        sys.exit(f"해결한 뒤 다시 실행하세요. 해당 모달리티를 빼고 돌리려면: ./run.sh --skip {mods}")
     print(f"검사할 영상 {len(videos)}개: " + ", ".join(os.path.basename(v) for v in videos), flush=True)
 
     explainer = None

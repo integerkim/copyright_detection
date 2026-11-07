@@ -34,19 +34,13 @@ except Exception:  # noqa: BLE001
     pass
 
 print("가중치")
-W = {
-    "HybrIK checkpoint": ("third_party/HybrIK/pretrained_models/hybrik_hrnet.pth", "./setup.sh --download"),
-    "SMPL neutral (HybrIK)": ("third_party/HybrIK/model_files/basicModel_neutral_lbs_10_207_0_v1.0.0.pkl",
-                              "SMPL 공식 사이트에서 라이선스 동의 후 받기 (HybrIK README model_files)"),
-    "SMPL-X npz (HybrIK import 시 필요)": ("third_party/HybrIK/model_files/smplx/SMPLX_NEUTRAL.npz", "SMPL-X 공식 사이트"),
-    "torchvision Faster R-CNN": ("weights/torch/hub/checkpoints/fasterrcnn_resnet50_fpn_coco-258fb6c6.pth", "./setup.sh --download"),
-    "YOLO11 pose": ("weights/yolo/yolo11m-pose.pt", "./setup.sh --download"),
-    "YOLO11 seg": ("weights/yolo/yolo11m-seg.pt", "./setup.sh --download"),
-    "InsightFace buffalo_l": ("weights/insightface/models/buffalo_l/w600k_r50.onnx", "./setup.sh --download"),
-    "Qwen2.5-7B-Instruct": ("weights/llm/Qwen2.5-7B-Instruct/config.json", "./setup.sh --download (없으면 규칙 기반 설명만)"),
-}
-for k, (p, h) in W.items():
-    check(k, os.path.exists(os.path.join(ROOT, p)), h)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import assets as AS  # noqa: E402
+for mod, items in AS.REQUIRED.items():
+    for k, p, h in items:
+        check(f"[{mod}] {k}  ({p})", AS.present(p), h)
+for k, p, h in AS.OPTIONAL:
+    print(f"  [{'OK' if AS.present(p) else '선택'}] {k}" + ("" if AS.present(p) else f"  -> {h}"))
 
 print("보호 DB (copyright_database/, 넣는 법: copyright_database/README.md)")
 D = os.path.join(ROOT, "copyright_database")

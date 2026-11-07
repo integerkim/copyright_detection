@@ -5,7 +5,8 @@
 # 결과: results/summary.txt (전체 요약), results/<영상 이름>/report.txt, report.json
 set -Eeuo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ENV_NAME="${COPYRIGHT_ENV:-copyright}"
+# conda 환경: COPYRIGHT_ENV > setup.sh 가 기록한 .conda_env > copyright
+ENV_NAME="${COPYRIGHT_ENV:-$(cat "${ROOT}/.conda_env" 2>/dev/null || echo copyright)}"
 VIDEOS=(); OPTS=()
 while [[ $# -gt 0 ]]; do
   case "$1" in --*) OPTS+=("$@"); break;; *) VIDEOS+=("$(realpath "$1")"); shift;; esac
