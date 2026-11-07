@@ -1,0 +1,15 @@
+audio:
+  sample_rate: 44100
+  channels: 2
+
+evidence_aggregation:
+  cover: 0.35
+  rhythm: 0.35
+  acoustic_sequence: 0.29
+  fingerprint: 0.01
+  reverse_direction_floor: 0.35
+
+thresholds:
+  track_review: 40
+  track_high_suspicion: 70
+  fingerprint_alert: 0.30

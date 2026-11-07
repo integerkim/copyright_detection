@@ -1,0 +1,15 @@
+# 용량 (setup.sh --download 로 받음)
+weights/
+third_party/HybrIK/pretrained_models/
+# SMPL / SMPL-X: 라이선스상 재배포 불가 (공식 사이트에서 직접 받기)
+third_party/HybrIK/model_files/*.pkl
+third_party/HybrIK/model_files/smplx/
+third_party/HybrIK/model_files/smplx_kid_template.npy
+# dlib 랜드마크 (비상업, 기존 face_geometry.py 전용)
+face_infringement/shape_predictor_68_face_landmarks.dat
+# 실행하면 생기는 것
+results/
+cache/
+__pycache__/
+*.pyc
+.pytest_cache/

@@ -1,0 +1,64 @@
+# 통합 저작권 도용 탐지 환경 (단일 환경)
+# 검증: Ubuntu, NVIDIA 드라이버 550 (CUDA 12.4), RTX A6000
+#
+#   ./setup.sh                 # 권장: 아래 환경 생성 + chumpy 설치 + 확인까지 한 번에
+#   (수동) conda env create -f environment.yml
+#          conda run -n copyright pip install --no-build-isolation chumpy==0.70
+#
+# 주의
+#  - numpy 는 1.26.4 로 고정 (chumpy / HybrIK / essentia 호환). 다른 패키지를 추가 설치할 때 numpy 2.x 로 올라가지 않게 할 것.
+#  - chumpy 는 setup.py 에서 pip 를 import 하므로 --no-build-isolation 으로 따로 설치한다 (setup.sh 가 처리).
+#  - pytorch3d 는 HybrIK import 시에만 필요하다. 아래 find-links 의 공식 휠(py310/cu121/torch2.4.1)을 쓴다.
+name: copyright
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - ffmpeg=7.1
+  - numpy=1.26.4             # conda 쪽에서도 고정 (dlib 등이 numpy 2.x 를 끌어오지 않도록)
+  - dlib=19.24.8=cpu_py310*  # 기존 face_geometry.py 용, CPU 빌드 (CUDA 빌드는 CUDA 11.8/cuDNN 을 끌어와 torch 와 충돌 위험)
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu121
+      - --find-links https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/py310_cu121_pyt241/download.html
+      - torch==2.4.1
+      - torchvision==0.19.1
+      - pytorch3d==0.7.8
+      - iopath==0.1.10
+      - numpy==1.26.4
+      - scipy==1.13.1
+      - opencv-python==4.11.0.86
+      - opencv-python-headless==4.10.0.84
+      - scikit-image==0.25.2
+      - scikit-learn==1.7.2
+      # motion (HybrIK)
+      - easydict==1.13
+      - pycocotools==2.0.11
+      - cython
+      - six
+      - joblib
+      - terminaltables
+      - tqdm
+      - matplotlib
+      - ffmpeg-python==0.2.0
+      # avatar
+      - ultralytics==8.3.40
+      # face
+      - insightface==0.7.3
+      - onnx==1.16.2
+      - onnxruntime-gpu==1.19.2
+      - albumentations==1.4.10
+      - albucore==0.0.12
+      # audio
+      - librosa==0.10.2.post1
+      - soundfile==0.14.0
+      - essentia==2.1b6.dev1389
+      - pyyaml
+      - pytest
+      # LLM 설명
+      - transformers==4.46.3
+      - accelerate==1.1.1
+      - huggingface_hub==0.36.2
+      - safetensors
+      # 가중치 다운로드 (setup.sh --download)
+      - gdown
