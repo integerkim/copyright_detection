@@ -33,37 +33,36 @@ results/                검사 결과 (summary.txt + 영상별 폴더)
 GitHub에서 받은 저장소에는 가중치가 없습니다. 아래 두 단계를 거칩니다.
 
 **1) SMPL 모델 넣기 (직접, 1개 파일)**: 라이선스상 재배포가 안 되어 자동으로 받지 않습니다.
-중립(neutral) 모델은 SMPLify 배포본에 들어 있습니다. [smplify.is.tue.mpg.de](https://smplify.is.tue.mpg.de)에 가입하고 SMPLify 코드(zip)를 받으면
-`smplify_public/code/models/basicModel_neutral_lbs_10_207_0_v1.0.0.pkl`이 있습니다. 이 파일을 이름 그대로 아래 위치에 둡니다.
-(SMPL 사이트의 v1.0.0 Python 배포본에는 남/녀 모델만 있고 중립 모델이 없습니다.)
+중립(neutral) 모델은 따로 전달드리겠습니다. basicModel_neutral_lbs_10_207_0_v1.0.0.pkl 이름입니다. 
 
 ```
 third_party/HybrIK/model_files/
-├─ basicModel_neutral_lbs_10_207_0_v1.0.0.pkl   <- 직접 넣는 파일
+├─ **basicModel_neutral_lbs_10_207_0_v1.0.0.pkl   <- 직접 넣는 파일**
 ├─ J_regressor_h36m.npy                          (저장소에 포함)
 └─ h36m_mean_beta.npy                            (저장소에 포함)
 ```
-
-SMPL-X는 필요 없습니다.
 
 **2) 환경 + 가중치**
 
 ```bash
 cd copyright_detection
 ./setup.sh --download              # conda 환경 'copyright' 생성 + 가중치 다운로드(약 16GB) + 설치 점검
-./setup.sh --download --no_llm     # 설명용 LLM(약 15GB)을 빼고 받기 (설명은 규칙 기반 문장)
 ./setup.sh --env 이름 --download   # 환경 이름을 바꿀 때. run.sh 가 같은 환경을 쓰도록 .conda_env 에 기록됨
 ```
 
 - 마지막에 `모든 항목 정상`이 나오면 설치가 끝난 것입니다. `MISSING`이 남으면 표시된 안내대로 해결합니다.
-- 중간에 실패하면 원인을 해결하고 **같은 명령으로 다시 실행**합니다. 이미 받은 파일은 건너뜁니다. 전체 기록은 `setup.log`에 남습니다.
-- HybrIK 체크포인트는 Google Drive에서 받으므로 일일 한도에 걸릴 수 있습니다. 이때는 실패 메시지에 나오는 링크에서 브라우저로 받아 `third_party/HybrIK/pretrained_models/hybrik_hrnet.pth`로 저장합니다.
-- 설치 점검만 다시 하려면 `conda run -n copyright python integrated/check_setup.py`를 실행합니다.
-- `environment.yml`은 사람이 읽기 쉬운 정리본, `environment.lock.yml`은 개발 환경을 그대로 export한 버전 고정본입니다(설치 문제가 생길 때 사용).
+- --> 아마 smpl 안넣고 setup 돌리면 missing 나올겁니다..!
+- 중간에 실패하면 원인을 해결하고 같은 명령으로 다시 실행합니다. 이미 받은 파일은 건너뜁니다. 전체 기록은 `setup.log`에 남습니다.
 
 `./run.sh`는 시작할 때 필요한 파일을 먼저 확인합니다. 빠진 파일이 있으면 몇 분씩 돌다 '판정 불가'를 내지 않고, 바로 멈추고 무엇이 없는지 알려 줍니다.
 
 ## 2. 실행
+요약
+0. git clone https://github.com/integerkim/copyright_detection.git
+1. cd ~ ./copyright_detection/
+2. ./setup.sh --download
+3. conda activate copyright
+4. ./run.sh
 
 ```bash
 ./run.sh                                    # suspect_data/ 의 영상을 모두 검사
@@ -85,6 +84,8 @@ Python에서 직접 실행하려면 `conda activate copyright`(설치 때 지정
 | `<영상 이름>/motion/` `face/` `avatar/` `audio/` | 모달리티별 원본 결과 (각 모듈이 원래 내던 result.txt / json / csv) |
 
 처리 시간은 5초 영상 1개 기준 약 4~5분입니다(A6000). 대부분은 모션이 차지합니다(HybrIK 약 1분 + DB 탐색 약 2~3분).
+
+#FYI: 출력 프롬프트를 조절하는 프롬프트는 integrated/explain.py에 있습니다.
 
 ## 3. 출력 예시 (`results/kdg_face_avatar_copy/report.txt`)
 
