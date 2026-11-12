@@ -66,6 +66,8 @@ cd copyright_detection
 
 ```bash
 ./run.sh                                    # suspect_data/ 의 영상을 모두 검사
+./run.sh --all                              # 위와 같음 (4개 모달리티 모두)
+./run.sh --monitor                          # 모션만 검사 (= --skip face avatar audio)
 ./run.sh a.mp4 b.mp4                        # 특정 영상만 (폴더를 줘도 됨)
 ./run.sh --no_llm                           # LLM 없이 (규칙 기반 설명만)
 ./run.sh --skip motion                      # 특정 모달리티 제외
